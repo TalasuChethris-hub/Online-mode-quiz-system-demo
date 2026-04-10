@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container login-container">
+    <div class="login-header">
+        <div>
+            <h1>Welcome Back</h1>
+            <p>Login to continue and track your progress</p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" class="input-default" placeholder="Enter your email">
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" class="input-default" type="password" placeholder="Enter your password">
+    </div>
+
+    <button class="primary-button" onclick="login()">Login</button>
+</div>
+
+<script>
+async function login() {
+    const res = await fetch('http://localhost:5000/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            email: email.value,
+            password: password.value
+        })
+    });
+
+    const data = await res.json();
+
+    if(data.id){
+        localStorage.setItem("userId", data.id);
+        localStorage.setItem("email", data.email || '');
+        window.location.href = "profile.html";
+    } else {
+        alert("Login Failed");
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Profile</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container profile-page">
+    <div class="profile-hero">
+        <div>
+            <h1>Welcome Back!</h1>
+            <p class="hero-text">Ready to continue your practice? Your quiz progress and results are just one click away.</p>
+        </div>
+        <div class="profile-badge">Profile</div>
+    </div>
+
+    <div class="profile-card">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-info">
+            <h2>Student Dashboard</h2>
+            <p class="profile-meta"><strong>Email</strong><span id="profileEmail">user@example.com</span></p>
+            <p class="profile-meta"><strong>User ID</strong><span id="profileId">#0000</span></p>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <button class="primary-button" onclick="startQuiz()">Start Quiz</button>
+        <button class="secondary-button" onclick="viewResults()">View Results</button>
+        <button class="danger-button" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<script>
+function loadProfile() {
+    const userId = localStorage.getItem("userId");
+    const email = localStorage.getItem("email") || 'Not set';
+
+    if (!userId) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    document.getElementById('profileEmail').innerText = email;
+    document.getElementById('profileId').innerText = `#${userId}`;
+}
+
+function startQuiz(){
+    window.location.href = "quiz.html";
+}
+
+function viewResults(){
+    window.location.href = "results.html";
+}
+
+function logout(){
+    localStorage.removeItem("userId");
+    localStorage.removeItem("email");
+    window.location.href = "index.html";
+}
+
+document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+
+</body>
+</html>

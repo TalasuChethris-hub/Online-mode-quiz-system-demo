@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Results</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+<h2>Your Results</h2>
+
+<ul id="results"></ul>
+
+<button onclick="goBack()">Back</button>
+</div>
+
+<script>
+async function loadResults(){
+    const userId = localStorage.getItem("userId");
+
+    const res = await fetch(`http://localhost:5000/results/${userId}`);
+    const data = await res.json();
+
+    const list = document.getElementById('results');
+
+    data.forEach(r=>{
+        const li = document.createElement('li');
+        li.innerText = "Score: " + r.score + " | " + r.date;
+        list.appendChild(li);
+    });
+}
+
+function goBack(){
+    window.location.href = "profile.html";
+}
+
+loadResults();
+</script>
+
+</body>
+</html>

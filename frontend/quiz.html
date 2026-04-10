@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #eef2f7;
+}
+
+.container {
+    width: 600px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-top: 30px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+}
+
+h2 {
+    text-align: center;
+}
+
+.timer {
+    text-align: right;
+    font-weight: bold;
+    color: red;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.quiz-user {
+    margin: 6px 0 0;
+    color: #3a4d8f;
+    font-size: 0.95rem;
+}
+
+.question-box {
+    background: #f9fafc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+}
+
+.option {
+    display: block;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.option.correct {
+    background: #c8f7c5;
+}
+
+.option.wrong {
+    background: #f7c5c5;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+    <div class="quiz-header">
+        <div>
+            <h2>📘 DBMS Quiz</h2>
+            <p class="quiz-user" id="playerName">Good luck!</p>
+        </div>
+        <div class="timer">Time Left: <span id="time">60</span>s</div>
+    </div>
+
+    <div id="quiz"></div>
+
+    <button onclick="submitQuiz()">Submit Quiz</button>
+</div>
+
+<script>
+let questions = [];
+let timeLeft = 60;
+let timer;
+
+// ⏱️ TIMER
+function startTimer(){
+    timer = setInterval(()=>{
+        timeLeft--;
+        document.getElementById("time").innerText = timeLeft;
+
+        if(timeLeft <= 0){
+            clearInterval(timer);
+            alert("⏰ Time's up!");
+            submitQuiz();
+        }
+    },1000);
+}
+
+function loadUserName(){
+    const userId = localStorage.getItem("userId");
+    const displayName = localStorage.getItem("displayName") || localStorage.getItem("username") || 'Student';
+
+    if (!userId) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    document.getElementById('playerName').innerText = `Hello, ${displayName}!`; 
+}
+
+async function loadQuestions(){
+    const res = await fetch('http://localhost:5000/questions');
+    questions = await res.json();
+
+    const quizDiv = document.getElementById('quiz');
+    quizDiv.innerHTML = '';
+
+    questions.forEach((q,i)=>{
+        quizDiv.innerHTML += `
+        <div class="question-box" id="qbox${i}">
+            <p><b>${i+1}. ${q.question}</b></p>
+
+            <label class="option">
+                <input type="radio" name="q${i}" value="${q.option1}">
+                ${q.option1}
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q${i}" value="${q.option2}">
+                ${q.option2}
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q${i}" value="${q.option3}">
+                ${q.option3}
+            </label>
+
+            <label class="option">
+                <input type="radio" name="q${i}" value="${q.option4}">
+                ${q.option4}
+            </label>
+        </div>
+        `;
+    });
+
+    startTimer(); // start timer after loading
+}
+
+// ✅ SUBMIT + SHOW ANSWERS
+async function submitQuiz(){
+    clearInterval(timer);
+
+    let score = 0;
+
+    questions.forEach((q,i)=>{
+        const selected = document.querySelector(`input[name=q${i}]:checked`);
+        const options = document.querySelectorAll(`#qbox${i} .option`);
+
+        options.forEach(opt=>{
+            const val = opt.innerText.trim();
+
+            if(val === q.answer){
+                opt.classList.add("correct"); // highlight correct
+            }
+
+            if(selected && selected.value === val && val !== q.answer){
+                opt.classList.add("wrong"); // highlight wrong
+            }
+        });
+
+        if(selected && selected.value === q.answer) score++;
+    });
+
+    const userId = localStorage.getItem("userId");
+
+    await fetch('http://localhost:5000/result',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({user_id:userId, score})
+    });
+
+    alert("🎯 Your Score: " + score);
+}
+
+loadUserName();
+loadQuestions();
+</script>
+
+</body>
+</html>
